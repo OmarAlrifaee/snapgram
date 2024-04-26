@@ -9,7 +9,7 @@ type ProfileUploaderProps = {
 };
 
 const ProfileUploader = ({ fieldChange, mediaUrl }: ProfileUploaderProps) => {
-  const [file, setFile] = useState<File[]>([]);
+  const [, setFile] = useState<File[]>([]);
   const [fileUrl, setFileUrl] = useState<string>(mediaUrl);
 
   const onDrop = useCallback(
@@ -18,7 +18,7 @@ const ProfileUploader = ({ fieldChange, mediaUrl }: ProfileUploaderProps) => {
       fieldChange(acceptedFiles);
       setFileUrl(convertFileToUrl(acceptedFiles[0]));
     },
-    [file]
+    [fieldChange]
   );
 
   const { getRootProps, getInputProps } = useDropzone({

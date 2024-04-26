@@ -13,7 +13,7 @@ import { Models } from "appwrite";
 
 export type SearchResultProps = {
   isSearchFetching: boolean;
-  searchedPosts: any;
+  searchedPosts: Models.DocumentList<Models.Document>;
 };
 
 const SearchResults = ({
@@ -44,7 +44,7 @@ export const Explore = () => {
     if (inView && !searchValue) {
       fetchNextPage();
     }
-  }, [inView, searchValue]);
+  }, [inView, searchValue, fetchNextPage]);
 
   if (!posts)
     return (
@@ -100,7 +100,9 @@ export const Explore = () => {
         {shouldShowSearchResults ? (
           <SearchResults
             isSearchFetching={isSearchFetching}
-            searchedPosts={searchedPosts}
+            searchedPosts={
+              searchedPosts as Models.DocumentList<Models.Document>
+            }
           />
         ) : shouldShowPosts ? (
           <p className="text-light-4 mt-10 text-center w-full">End of posts</p>

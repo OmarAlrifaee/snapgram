@@ -5,12 +5,12 @@ import { useGetCurrentUser } from "@/lib/react-query//queriesAndMutations";
 
 export const Saved = () => {
   const { data: currentUser } = useGetCurrentUser();
-  let savePosts = currentUser?.save
+  const savePosts = currentUser?.save
     ?.map((savePost: Models.Document) => savePost.post)
     .reverse();
-  if (savePosts?.includes(null) || savePosts === undefined) {
-    savePosts = [];
-  }
+  // if (savePosts?.includes(null) || savePosts === undefined) {
+  //   savePosts = [];
+  // }
   return (
     <div className="saved-container">
       <div className="flex gap-2 w-full max-w-5xl">
