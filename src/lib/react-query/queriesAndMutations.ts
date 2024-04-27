@@ -7,7 +7,6 @@ import {
 import {
   createPost,
   createUserAccount,
-  deletePost,
   deleteSavedPost,
   getCurrentUser,
   getInfintePosts,
@@ -130,18 +129,6 @@ export const useUpdatePost = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
-      });
-    },
-  });
-};
-export const useDeletePost = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ postId, imageId }: { imageId: string; postId: string }) =>
-      deletePost(postId, imageId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });
     },
   });

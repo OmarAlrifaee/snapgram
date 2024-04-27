@@ -1,34 +1,46 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-
-import { Button } from "@/components/ui";
+import { Button, useToast } from "@/components/ui";
 import Loader from "@/components/shared/Loader";
-// import { GridPostList, PostStats } from "@/components/shared";
-
 import {
   useGetPostById,
   useSearchPosts,
-  useDeletePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/authContext";
 import PostStats from "@/components/shared/PostStats";
 import GridPostList from "@/components/shared/GridPostList";
 import { Models } from "appwrite";
+import { deletePost } from "@/lib/appwrite/api";
+import { useState } from "react";
 
 export const PostDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUserContext();
-
-  const { data: post, isLoading } = useGetPostById(id || "");
-  const { mutate: deletePost } = useDeletePost();
+  const [deletingPost, setDeleting] = useState(false);
+  const { data: post, isLoading } = useGetPostById(id as string);
   const { data: relatedPosts, isFetching: isRelatedPostsLoading } =
     useSearchPosts(post?.caption);
-  const handleDeletePost = () => {
-    deletePost({ postId: id || "", imageId: post?.imageId });
-    navigate(-1);
+  const { toast } = useToast();
+  const handleDeletePost = async () => {
+    const savedRecords = post?.save?.map((save: Models.Document) => save?.$id);
+    setDeleting(true);
+    const status = await deletePost(
+      post?.$id as string,
+      post?.imageId,
+      savedRecords || []
+    );
+    if (status) {
+      toast({ title: "Deleted Successfully" });
+      navigate("/");
+    } else {
+      toast({
+        title: "Something Went Wronge Please Try Agine",
+        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
+      });
+    }
+    setDeleting(false);
   };
-
   return (
     <div className="post_details-container">
       <div className="hidden md:flex max-w-5xl w-full">
@@ -100,20 +112,26 @@ export const PostDetails = () => {
                   />
                 </Link>
 
-                <Button
-                  onClick={handleDeletePost}
-                  variant="ghost"
-                  className={`ost_details-delete_btn ${
-                    user.id !== post?.creator.$id && "hidden"
-                  }`}
-                >
-                  <img
-                    src={"/assets/icons/delete.svg"}
-                    alt="delete"
-                    width={24}
-                    height={24}
-                  />
-                </Button>
+                {deletingPost ? (
+                  <div className="flex-center gap-2">
+                    <Loader />
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleDeletePost}
+                    variant="ghost"
+                    className={`ost_details-delete_btn ${
+                      user.id !== post?.creator.$id && "hidden"
+                    } ${deletingPost && "pointer-events-none"}`}
+                  >
+                    <img
+                      src={"/assets/icons/delete.svg"}
+                      alt="delete"
+                      width={24}
+                      height={24}
+                    />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -134,10 +152,7 @@ export const PostDetails = () => {
             </div>
 
             <div className="w-full">
-              <PostStats
-                post={post}
-                userId={user.id}
-              />
+              <PostStats post={post} userId={user.id} />
             </div>
           </div>
         </div>

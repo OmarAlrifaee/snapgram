@@ -263,9 +263,16 @@ export const updatePost = async (post: IUpdatePost) => {
     console.log(error);
   }
 };
-export const deletePost = async (postId: string, imageId: string) => {
+export const deletePost = async (
+  postId: string,
+  imageId: string,
+  savedRecordIds: string[]
+) => {
   if (!postId || !imageId) throw Error;
   try {
+    if (savedRecordIds.length > 0) {
+      await deleteAllSavedRecord(savedRecordIds);
+    }
     const statusCode = await databases.deleteDocument(
       appWriteConfig.databaseId,
       appWriteConfig.postsColectionId,
@@ -273,6 +280,7 @@ export const deletePost = async (postId: string, imageId: string) => {
     );
     if (!statusCode) throw Error;
     await deleteFile(imageId);
+    return statusCode;
   } catch (error) {
     console.log(error);
   }
@@ -421,3 +429,29 @@ export async function updateUser(user: IUpdateUser) {
     console.log(error);
   }
 }
+// -----> saved posts
+export const getSavedPosts = async (userId: string) => {
+  try {
+    const posts = await databases.listDocuments(
+      appWriteConfig.databaseId,
+      appWriteConfig.savesColectionId,
+      [Query.equal("user", userId)]
+    );
+    return posts.documents || null;
+  } catch (error) {
+    console.log(error);
+  }
+};
+const deleteAllSavedRecord = async (savedRecordsIds: string[]) => {
+  try {
+    savedRecordsIds?.forEach(async (id) => {
+      await databases.deleteDocument(
+        appWriteConfig.databaseId,
+        appWriteConfig.savesColectionId,
+        id
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

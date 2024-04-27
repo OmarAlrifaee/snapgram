@@ -36,7 +36,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
   const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
-  // 1. Define your form.
+
   const form = useForm<z.infer<typeof postValidation>>({
     resolver: zodResolver(postValidation),
     defaultValues: {
@@ -46,8 +46,15 @@ const PostForm = ({ post, action }: PostFormProps) => {
       tags: post ? post?.tags.join(",") : "",
     },
   });
-  // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof postValidation>) {
+
+  const onSubmit = async (values: z.infer<typeof postValidation>) => {
+    if (!values.file.length) {
+      toast({
+        title: "You Can't Post Without Image",
+        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
+      });
+      return false;
+    }
     if (post && action === "Update") {
       const updatedPost = await updatePost({
         ...values,
@@ -55,7 +62,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
         imageId: post?.imageId,
         imageUrl: post?.imageUrl,
       });
-      if (!updatedPost)
+      if (!updatedPost) {
         toast({
           title: "Please Try Agine",
           style: {
@@ -64,6 +71,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
             fontWeight: "bold",
           },
         });
+      }
       form.reset();
       return navigate(`/posts/${post?.$id}`);
     }
@@ -79,7 +87,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
       title: "Your Post Has Successfully Uplodaed",
       style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
     });
-  }
+  };
   return (
     <Form {...form}>
       <form
@@ -127,11 +135,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
             <FormItem>
               <FormLabel className="shad-form_label">Add Location</FormLabel>
               <FormControl>
-                <Input
-                  type="text"
-                  className="shad-input"
-                  {...field}
-                />
+                <Input type="text" className="shad-input" {...field} />
               </FormControl>
 
               <FormMessage className="shad-form_message" />
