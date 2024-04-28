@@ -133,17 +133,19 @@ export const useUpdatePost = () => {
     },
   });
 };
-export const useGetInfintePosts = () =>
-  useInfiniteQuery({
+export const useGetInfintePosts = () => {
+  return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
+    // @ts-expect-error ...
     queryFn: getInfintePosts,
     getNextPageParam: (lastPage) => {
-      if (lastPage && lastPage.documents.length === 0) return null;
+      if (lastPage && lastPage?.documents?.length === 0) return null;
       const lastPageId =
-        lastPage?.documents?.[lastPage?.documents?.length - 1].$id;
+        lastPage?.documents?.[lastPage?.documents?.length - 1]?.$id;
       return lastPageId;
     },
   });
+};
 export const useSearchPosts = (searchTerm: string) =>
   useQuery({
     queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm],
