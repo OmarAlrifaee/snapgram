@@ -11,7 +11,7 @@ import PostStats from "@/components/shared/PostStats";
 import GridPostList from "@/components/shared/GridPostList";
 import { Models } from "appwrite";
 import { deletePost } from "@/lib/appwrite/api";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export const PostDetails = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export const PostDetails = () => {
   const { data: relatedPosts, isFetching: isRelatedPostsLoading } =
     useSearchPosts(post?.caption);
   const { toast } = useToast();
-  const handleDeletePost = async () => {
+  const handleDeletePost = useCallback(async () => {
     const savedRecords = post?.save?.map((save: Models.Document) => save?.$id);
     setDeleting(true);
     const status = await deletePost(
@@ -40,7 +40,7 @@ export const PostDetails = () => {
       });
     }
     setDeleting(false);
-  };
+  }, [navigate, post, toast]);
   return (
     <div className="post_details-container">
       <div className="hidden md:flex max-w-5xl w-full">

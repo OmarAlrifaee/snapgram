@@ -22,6 +22,7 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 
 export const SignUpForm = () => {
   const { toast } = useToast();
@@ -42,41 +43,53 @@ export const SignUpForm = () => {
   });
 
   // 2. Define a submit handler.
-  const onSubmit = async (values: z.infer<typeof signUpValidation>) => {
-    const newUser = await createUserAccount(values);
-    if (!newUser)
-      return toast({
-        title: "Signing Up Faild Please Try Agine",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof signUpValidation>) => {
+      const newUser = await createUserAccount(values);
+      if (!newUser)
+        return toast({
+          title: "Signing Up Faild Please Try Agine",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
+      const session = await signInAccount({
+        email: values.email,
+        password: values.password,
       });
-    const session = await signInAccount({
-      email: values.email,
-      password: values.password,
-    });
-    if (!session)
-      toast({
-        title: "Faild To Sign Up Please Try Agine",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
-      });
-    const isLoggedIn = await checkAuthUser();
-    if (isLoggedIn) {
-      form.reset();
-      navigate("/", { replace: true });
-    } else {
-      return toast({
-        title: "Sign Up Faild Please Try Agine",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
-      });
-    }
-  };
+      if (!session)
+        toast({
+          title: "Faild To Sign Up Please Try Agine",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
+      const isLoggedIn = await checkAuthUser();
+      if (isLoggedIn) {
+        form.reset();
+        navigate("/", { replace: true });
+      } else {
+        return toast({
+          title: "Sign Up Faild Please Try Agine",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
+      }
+    },
+    [toast, navigate, checkAuthUser, createUserAccount, form, signInAccount]
+  );
 
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
-        <img
-          src={LOGO}
-          alt="logo"
-        />
+        <img src={LOGO} alt="logo" />
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
           create a new account{" "}
         </h2>
@@ -159,10 +172,7 @@ export const SignUpForm = () => {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="shad-button_primary"
-          >
+          <Button type="submit" className="shad-button_primary">
             {isCreatingAccount ? (
               <div className="flex-center gap-2">
                 <Loader />

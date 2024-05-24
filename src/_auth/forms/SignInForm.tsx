@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { signInValidation } from "@/lib/validation/index";
 import { useSignInAccount } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/authContext";
+import { useCallback } from "react";
 
 export const SignInForm = () => {
   const { toast } = useToast();
@@ -36,44 +37,56 @@ export const SignInForm = () => {
     },
   });
 
-  const handleSignin = async (user: z.infer<typeof signInValidation>) => {
-    const session = await signInAccount(user);
+  const handleSignin = useCallback(
+    async (user: z.infer<typeof signInValidation>) => {
+      const session = await signInAccount(user);
 
-    if (!session) {
-      toast({
-        title: "Login failed. Please try again.",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
-      });
+      if (!session) {
+        toast({
+          title: "Login failed. Please try again.",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
 
-      return;
-    }
+        return;
+      }
 
-    const isLoggedIn = await checkAuthUser();
+      const isLoggedIn = await checkAuthUser();
 
-    if (isLoggedIn) {
-      toast({
-        title: "You Logged In Successfully",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
-      });
-      form.reset();
-      navigate("/");
-    } else {
-      toast({
-        title: "Login failed. Please try again.",
-        style: { backgroundColor: "white", color: "black", fontWeight: "bold" },
-      });
+      if (isLoggedIn) {
+        toast({
+          title: "You Logged In Successfully",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
+        form.reset();
+        navigate("/");
+      } else {
+        toast({
+          title: "Login failed. Please try again.",
+          style: {
+            backgroundColor: "white",
+            color: "black",
+            fontWeight: "bold",
+          },
+        });
 
-      return;
-    }
-  };
+        return;
+      }
+    },
+    [checkAuthUser, form, toast, navigate, signInAccount]
+  );
 
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
-        <img
-          src="/assets/images/logo.svg"
-          alt="logo"
-        />
+        <img src="/assets/images/logo.svg" alt="logo" />
 
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
           Log in to your account
@@ -92,11 +105,7 @@ export const SignInForm = () => {
               <FormItem>
                 <FormLabel className="shad-form_label">Email</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    className="shad-input"
-                    {...field}
-                  />
+                  <Input type="text" className="shad-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -110,21 +119,14 @@ export const SignInForm = () => {
               <FormItem>
                 <FormLabel className="shad-form_label">Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    className="shad-input"
-                    {...field}
-                  />
+                  <Input type="password" className="shad-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button
-            type="submit"
-            className="shad-button_primary"
-          >
+          <Button type="submit" className="shad-button_primary">
             {isPending || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...

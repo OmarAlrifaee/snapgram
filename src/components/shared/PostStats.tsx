@@ -6,7 +6,7 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
 import { Models } from "appwrite";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Loader from "./Loader";
 
 type PostStatsProps = {
@@ -30,28 +30,34 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   useEffect(() => {
     setSaved(!!savedPostRecord);
   }, [savedPostRecord]);
-  const hundleLikePost = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    let newLikes = [...likes];
-    const hasLiked = newLikes?.includes(userId);
-    if (hasLiked) {
-      newLikes = newLikes?.filter((id) => id !== userId);
-    } else {
-      newLikes?.push(userId);
-    }
-    setLikes(newLikes);
-    likePost({ postId: post?.$id, likesArray: newLikes });
-  };
-  const hundleSavePost = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (savedPostRecord?.$id) {
-      deleteSavedPost(savedPostRecord?.$id);
-      setSaved(false);
-    } else {
-      savePost({ postId: post?.$id, userId });
-      setSaved(true);
-    }
-  };
+  const hundleLikePost = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      let newLikes = [...likes];
+      const hasLiked = newLikes?.includes(userId);
+      if (hasLiked) {
+        newLikes = newLikes?.filter((id) => id !== userId);
+      } else {
+        newLikes?.push(userId);
+      }
+      setLikes(newLikes);
+      likePost({ postId: post?.$id, likesArray: newLikes });
+    },
+    [likePost, post, likes, userId]
+  );
+  const hundleSavePost = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (savedPostRecord?.$id) {
+        deleteSavedPost(savedPostRecord?.$id);
+        setSaved(false);
+      } else {
+        savePost({ postId: post?.$id, userId });
+        setSaved(true);
+      }
+    },
+    [deleteSavedPost, post?.$id, savePost, savedPostRecord?.$id, userId]
+  );
   return (
     <div className="flex justify-between items-center z-20">
       <div className="flex gap-2 mr-5">

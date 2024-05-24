@@ -118,10 +118,7 @@ export const Explore = () => {
       </div>
 
       {hasNextPage && !searchValue && (
-        <div
-          ref={ref}
-          className="mt-10"
-        >
+        <div ref={ref} className="mt-10">
           <Loader />
         </div>
       )}
