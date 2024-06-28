@@ -1,7 +1,16 @@
 import { Navigate, Outlet } from "react-router-dom";
 import IMG from "/public/assets/images/side-img.svg";
+import { useEffect, useState } from "react";
+import { useUserContext } from "@/context/authContext";
 export const AuthLayout = () => {
-  const isLoggedIn = false;
+  const { checkAuthUser } = useUserContext();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const isLoggedIn = await checkAuthUser();
+      setIsLoggedIn(isLoggedIn);
+    })();
+  }, [checkAuthUser]);
   return (
     <>
       {isLoggedIn ? (
